@@ -1,7 +1,13 @@
 package channelpopularity.driver;
 
+import channelpopularity.util.Results;
+import channelpopularity.util.FileProcessor;
+
+import channelpopularity.state.factory.SimpleStateFactory;
+import channelpopularity.context.ChannelContext;
+
 /**
- * @author John Doe
+ * @author Preeti Priyam
  *
  */
 public class Driver {
@@ -19,5 +25,19 @@ public class Driver {
 			System.exit(0);
 		}
 		System.out.println("Hello World! Lets get started with the assignment");
+		String inputFile = args[0];
+		SimpleStateFactory SimpleStateFactoryVar;
+		//ChannelContext ChannelContextVar = new ChannelContext(SimpleStateFactoryI stateFactoryIn, List<State> stateNames);
+		FileProcessor fileprocessor = new FileProcessor(inputFile);
+		//private static final String ALPHANUMERIC_PATTERN = "^[a-zA-Z0-9.]*$";
+		String word = fileprocessor.poll();
+
+		while(word != null){
+			String[] array = word.split("::");
+			for(int i=0; i < array.length; i++){
+				System.out.println(array[i]);
+				word = fileprocessor.poll();
+		}
 	}
+}
 }
