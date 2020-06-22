@@ -6,7 +6,7 @@ package channelpopularity.state.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import channelpopularity.context.ContextI;
+import channelpopularity.context.ChannelContextI;
 import channelpopularity.entity.Advertisement;
 import channelpopularity.entity.Video;
 import channelpopularity.operation.Operation;
@@ -18,9 +18,9 @@ public class UltraPopularState extends AbstractState {
 
 	private static final Integer RANGE = 40;
 
-	ContextI context;
+	ChannelContextI context;
 
-	public UltraPopularState(ContextI context) {
+	public UltraPopularState(ChannelContextI context) {
 		this.context = context;
 	}
 
@@ -78,6 +78,7 @@ public class UltraPopularState extends AbstractState {
 			// Adding to result
 			Results.add(StateName.ULTRA_POPULAR, this.CONSTANT_VIDEO_ADDED, videoName);
 		} else {
+			// TODO: Do something if Video already present
 			System.out.println("exception: video name aleady present!");
 		}
 	}
@@ -99,6 +100,32 @@ public class UltraPopularState extends AbstractState {
 
 			// Adding to result
 			Results.add(StateName.ULTRA_POPULAR, this.CONSTANT_VIDEO_REMOVED, videoName);
+		} else {
+			// TODO: Do something if Video is not present
+			System.out.println("exception: video not found!");
+		}
+	}
+
+	@Override
+	public void metrics(String input) {
+
+		final Video videoRef = this.metricsformatter(input);
+
+		if (this.context.getDataSource().getStore().containsKey(videoRef.getName())) {
+
+			// Updating video in the cache
+			this.context.getDataSource().getStore().get(videoRef.getName()).update(videoRef.getViews(),
+					videoRef.getLikes(), videoRef.getDislikes());
+
+			// Need to refresh score
+			refresh();
+
+			// Updating state
+			update();
+
+			// Adding to result
+			Results.add(StateName.UNPOPULAR, this.CONSTANT_SCORE_UPDATE, this.channelScore.toString());
+
 		} else {
 			// TODO: Do something if Video is not present
 			System.out.println("exception: video not found!");

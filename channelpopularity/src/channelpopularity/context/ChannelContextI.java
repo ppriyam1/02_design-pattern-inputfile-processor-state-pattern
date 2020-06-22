@@ -20,4 +20,19 @@ public interface ChannelContextI {
 	 */
 	public void add(String input);
 
+	/**
+	 * @param input
+	 */
+	public void remove(String input);
+
+	/**
+	 * @param input
+	 */
+	public void metrics(String input);
+
+	/**
+	 * @param input
+	 */
+	public void request(String input);
+
 }

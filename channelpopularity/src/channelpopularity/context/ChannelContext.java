@@ -1,38 +1,76 @@
-//we have to use Simple Factory pattern which allows us to create object based on the parameter.
-// 1. The constructor of the context accepts an instance of SimpleStateFactory.
-/* 2. The setState(...) method of the context accepts an enum representing the state to change to.
-And this is provided to the SimpleStateFactory instance to fetch an instance of the respective state. */
-
-// Assume imports.
 package channelpopularity.context;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import channelpopularity.entity.VideoStore;
 import channelpopularity.state.StateI;
-import channelpopularity.state.State;
+import channelpopularity.state.StateName;
 import channelpopularity.state.factory.SimpleStateFactoryI;
-import java.util.*;
-//import wordPlay.util.Results;
 
-//import wordPlay.metrics.MetricsCalculator;
+public class ChannelContext implements ChannelContextI {
 
-		public class ChannelContext implements ChannelContextI {
-		    private StateI curState;
-		    private Map<State, StateI> availableStates;
-				videoStruct vs = new videoStruct();
-				//Arraylist<vs> a = new Arraylist<vs>;
+	private StateI curState;
 
+	private final Map<StateName, StateI> availableStates;
 
-		    public ChannelContext(SimpleStateFactoryI stateFactoryIn, List<State> stateNames) {
-			// initialize states using factory instance and the provided state names.
-			// initialize current state.
-      	curState = stateFactoryIn.getStartState();
+	private VideoStore videoStore = VideoStore.getInstance();
 
-		    }
+	/**
+	 * @param stateFactoryIn
+	 * @param stateNames
+	 */
+	public ChannelContext(SimpleStateFactoryI stateFactoryIn, List<StateName> stateNames) {
+		// Initialise states using factory instance and the provided state names.
+		availableStates = new HashMap<>();
 
-		    // Called by the States based on their logic of what the machine state should change to.
-		    public void setCurrentState(State nextState) {
-			if (availableStates.containsKey(nextState)) { // for safety.
-				curState = availableStates.get(nextState);
-			}
-		    }
+		stateNames.forEach((stateName) -> {
+			availableStates.put(stateName, stateFactoryIn.create(this, stateName));
+		});
+
+		// Initialise current state.
+		this.curState = this.availableStates.get(StateName.UNPOPULAR);
+	}
+
+	/**
+	 * @param nextState
+	 * @see: Called by the States based on their logic of what the machine state
+	 *       should change to.
+	 */
+	public void updateState(StateName nextState) {
+		if (availableStates.containsKey(nextState)) { // for safety.
+			curState = availableStates.get(nextState);
 		}
-//Arraylist<struct> q = new ..
-//
+	}
+
+	@Override
+	public VideoStore getDataSource() {
+		return videoStore;
+	}
+
+	@Override
+	public void add(String input) {
+		this.curState.add(input);
+	}
+
+	@Override
+	public void remove(String input) {
+		this.curState.remove(input);
+	}
+
+	@Override
+	public void metrics(String input) {
+		this.curState.metrics(input);
+	}
+
+	@Override
+	public void request(String input) {
+		this.curState.request(input);
+	}
+
+	@Override
+	public String toString() {
+		return "ChannelContext [curState=" + curState + ", availableStates=" + availableStates + "]";
+	}
+}

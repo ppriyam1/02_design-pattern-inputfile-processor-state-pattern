@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.file.InvalidPathException;
 
 import channelpopularity.context.ChannelContext;
-import channelpopularity.context.ContextI;
+import channelpopularity.context.ChannelContextI;
 import channelpopularity.operation.Operation;
 import channelpopularity.state.StateName;
 import channelpopularity.state.factory.SimpleStateFactory;
@@ -56,14 +56,19 @@ public class Driver {
 
 								if (instruction.contains(Operation.ADD_VIDEO.value)) {
 										context.add(instruction);
-									} else if (instruction.contains(Operation.REMOVE_VIDEO.value)) {
+								} else if (instruction.contains(Operation.REMOVE_VIDEO.value)) {
 										context.remove(instruction);
-									} else {
-										System.out.println("exception: Invalid Input exception!");
-									}
+								} else if (instruction.contains(Operation.METRICS.value)) {
+										context.metrics(instruction);
+								} else if (instruction.contains(Operation.AD_REQUEST.value)) {
+										context.request(instruction);
 								} else {
-
+										System.out.println("exception: Invalid Input exception!");
 								}
+						} else {
+
+						}
+
 				 } while (instruction != null);
 
 					StdoutDisplayInterface stdout = new Results();
