@@ -20,11 +20,10 @@ import java.util.*;
 				//Arraylist<vs> a = new Arraylist<vs>;
 
 
-
 		    public ChannelContext(SimpleStateFactoryI stateFactoryIn, List<State> stateNames) {
 			// initialize states using factory instance and the provided state names.
 			// initialize current state.
-      //curState = stateNames;
+      	curState = stateFactoryIn.getStartState();
 
 		    }
 
