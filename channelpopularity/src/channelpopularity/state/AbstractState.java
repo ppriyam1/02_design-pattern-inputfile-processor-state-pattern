@@ -1,5 +1,9 @@
 package channelpopularity.state;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import channelpopularity.context.ChannelContextI;
 import channelpopularity.entity.Advertisement;
 import channelpopularity.entity.Video;
 
@@ -14,8 +18,8 @@ public abstract class AbstractState implements StateI {
 	protected final String CONSTANT_AD_REQUEST_APPROVED = "APPROVED";
 	protected final String CONSTANT_AD_REQUEST_REJECTED = "REJECTED";
 
-	protected Integer channelScore = 0;
-	protected final int minAdvertisementLength = 1;
+	protected Integer channelScore = 1;
+	protected final int minAdvertisementLength = 2;
 
 	/**
 	 * @param views
@@ -23,13 +27,34 @@ public abstract class AbstractState implements StateI {
 	 * @param dislikes
 	 * @return
 	 */
-	protected final synchronized Integer calculatePopularity(Integer views, Integer likes, Integer dislikes) {
+	private static final Integer calculatePopularity(Integer views, Integer likes, Integer dislikes) {
 
 		Integer currScore = views + 2 * (likes - dislikes);
 
 		final Integer score = currScore > 0 ? currScore : 0;
 
 		return score;
+	}
+
+	private static final Integer findAverageScore(final Integer videoScore, final Integer numberOfVideos) {
+		return videoScore > 0 && numberOfVideos > 0 && videoScore >= numberOfVideos ? videoScore / numberOfVideos
+				: null;
+	}
+
+	protected final Integer getAverageTotalScore(ChannelContextI context) {
+
+		final List<Integer> videoScores = new ArrayList<>();
+
+		// re-calculating scores of each video
+		context.getDataSource().getStore().forEach((videoName, video) -> {
+			videoScores.add(calculatePopularity(video.getViews(), video.getLikes(), video.getDislikes()));
+		});
+
+		Integer totalVideoScore = videoScores.stream().mapToInt(Integer::intValue).sum();
+
+		Integer currAverageScore = findAverageScore(totalVideoScore, videoScores.size());
+
+		return currAverageScore != null ? currAverageScore : channelScore;
 	}
 
 	/**
@@ -106,8 +131,7 @@ public abstract class AbstractState implements StateI {
 		return advertisement;
 	}
 
-	protected abstract void refresh();
+	protected abstract void updateScore();
 
-	protected abstract void update();
-
+	protected abstract void updateState();
 }

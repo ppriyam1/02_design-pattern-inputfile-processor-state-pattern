@@ -35,8 +35,7 @@ public class ChannelContext implements ChannelContextI {
 
 	/**
 	 * @param nextState
-	 * @see: Called by the States based on their logic of what the machine state
-	 *       should change to.
+	 * Called by the States based on their logic of what the machine state should change to.      
 	 */
 	public void updateState(StateName nextState) {
 		if (availableStates.containsKey(nextState)) { // for safety.

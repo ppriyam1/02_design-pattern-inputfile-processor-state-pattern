@@ -13,7 +13,7 @@ public class SimpleStateFactory implements SimpleStateFactoryI {
 	public SimpleStateFactory() {
 	}
 
-	/**
+	/** 
 	 * @param stateName
 	 * @return
 	 */

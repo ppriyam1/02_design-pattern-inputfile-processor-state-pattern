@@ -1,6 +1,10 @@
 package channelpopularity.util;
 
 import channelpopularity.state.StateName;
+import channelpopularity.driver.Helper;
+import java.util.ArrayList;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
 
 public class Results implements FileDisplayInterface, StdoutDisplayInterface {
 
@@ -9,17 +13,25 @@ public class Results implements FileDisplayInterface, StdoutDisplayInterface {
 
 	private static final StringBuilder builder = new StringBuilder();
 
-	public static void add(StateName currentState, String operation, String target) {
-		builder.append(currentState + "__" + operation + "::" + target + " \n");
+	public static void add(String state, String operation, String target) {
+		builder.append(state + "__" + operation + "::" + target + " \n");
 	}
 
 	@Override
-	public void printToConsole() {
-		System.out.println(builder.toString());
+	public void print() {
+		System.out.print(builder.toString());
 	}
 
 	@Override
-	public void printToFile(String fileName) {
-		// TODO: Open an output stream to push string builder content on the output file
+	public void print(String fileName) {
+		try {
+			BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+			writer.append(builder.toString());
+			writer.close();
+		}
+		catch(Exception e){
+			System.err.println(e);
+			System.exit(0);
+		}
 	}
 }

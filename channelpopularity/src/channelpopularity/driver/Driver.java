@@ -34,49 +34,7 @@ public class Driver {
 			System.err.printf("Error: Incorrect number of arguments. Program accepts %d arguments.", REQUIRED_NUMBER_OF_CMDLINE_ARGS);
 			System.exit(0);
 		}
-		System.out.println("Hello World! Lets get started with the assignment");
-		init(args[0]);
+		Helper helper = new Helper();
+		helper.init(args[0], args[1]);
 	}
-
-	/**
-	 * @param input
-	 */
-	public static void init(String input) {
-
-			try{
-					final String PATH = "./" + input;
-					FileProcessor fp = new FileProcessor(PATH);
-					SimpleStateFactoryI factoryI = new SimpleStateFactory();
-					ChannelContextI context = new ChannelContext(factoryI, StateName.getList());
-					String instruction = null;
-					do {
-							instruction = fp.poll();// read next line
-
-							if (instruction != null) {
-
-								if (instruction.contains(Operation.ADD_VIDEO.value)) {
-										context.add(instruction);
-								} else if (instruction.contains(Operation.REMOVE_VIDEO.value)) {
-										context.remove(instruction);
-								} else if (instruction.contains(Operation.METRICS.value)) {
-										context.metrics(instruction);
-								} else if (instruction.contains(Operation.AD_REQUEST.value)) {
-										context.request(instruction);
-								} else {
-										System.out.println("exception: Invalid Input exception!");
-								}
-						} else {
-
-						}
-
-				 } while (instruction != null);
-
-					StdoutDisplayInterface stdout = new Results();
-					stdout.printToConsole();
-
-					fp.close();
-		  } catch (InvalidPathException | SecurityException | IOException e) {
-					e.printStackTrace();
-			}
-		}
 	}

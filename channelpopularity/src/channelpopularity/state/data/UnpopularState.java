@@ -1,10 +1,4 @@
-/**
- *
- */
 package channelpopularity.state.data;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import channelpopularity.context.ChannelContextI;
 import channelpopularity.entity.Advertisement;
@@ -16,7 +10,12 @@ import channelpopularity.util.Results;
 
 public class UnpopularState extends AbstractState {
 
-	private static final Integer RANGE = 10;
+	private static final String STATE_NAME = StateName.UNPOPULAR.toString();
+
+	private static final Integer STATE_POPULARITY_SCORE_MIN_LIMIT = 1;
+	private static final Integer STATE_POPULARITY_SCORE_MAX_LIMIT = 1000;
+
+	private static final Integer STATE_AD_REQUEST_RANGE = 10;
 
 	private ChannelContextI context;
 
@@ -28,45 +27,23 @@ public class UnpopularState extends AbstractState {
 	}
 
 	@Override
-	protected void update() {
-		// updating state if the popularity score has exceeded the range of this state
-		if (this.channelScore > StateName.UNPOPULAR.value)
-			this.context.updateState(StateName.MILDLY_POPULAR);
-
-		else if (this.channelScore > StateName.MILDLY_POPULAR.value
-				&& this.channelScore <= StateName.HIGHLY_POPULAR.value)
-			this.context.updateState(StateName.HIGHLY_POPULAR);
-
-		else if (this.channelScore > StateName.HIGHLY_POPULAR.value
-				&& this.channelScore <= StateName.ULTRA_POPULAR.value)
-			this.context.updateState(StateName.ULTRA_POPULAR);
+	protected void updateScore() {
+		synchronized (this) {
+			Integer newScore = this.getAverageTotalScore(this.context);
+			if (!newScore.equals(this.channelScore)) {
+				this.channelScore = newScore;
+			}
+		}
 	}
 
 	@Override
-	protected void refresh() {
-
-		final List<Integer> videoScores = new ArrayList<>();
-
-		// re-calculating scores of each video
-		this.context.getDataSource().getStore().forEach((videoName, video) -> {
-			videoScores.add(this.calculatePopularity(video.getViews(), video.getLikes(), video.getDislikes()));
-		});
-
-		Integer totalVideoScore = videoScores.stream().mapToInt(Integer::intValue).sum();
-
-		if (totalVideoScore > videoScores.size()) {
-
-			// Calculating total score
-			// Calculating average of the popularity score of all the videos
-			Integer averageTotalVideoScore = totalVideoScore / videoScores.size();
-
-
-			this.channelScore = averageTotalVideoScore;
-
-		} else {
-			// No update to channel score
+	protected void updateState() {
+		if (!(this.channelScore <= STATE_POPULARITY_SCORE_MIN_LIMIT)) {
+			synchronized (this) {
+				if (this.channelScore > STATE_POPULARITY_SCORE_MAX_LIMIT)
+					this.context.updateState(StateName.MILDLY_POPULAR);
+			}
 		}
-
 	}
 
 	@Override
@@ -78,10 +55,14 @@ public class UnpopularState extends AbstractState {
 			// Adding video to cache
 			this.context.getDataSource().getStore().put(videoName, new Video(videoName));
 
-			// No need to refresh score
+			// Need to update score
+			updateScore();
+
+			// Updating state
+			updateState();
 
 			// Adding to result
-			Results.add(StateName.UNPOPULAR, this.CONSTANT_VIDEO_ADDED, videoName);
+			Results.add(STATE_NAME, this.CONSTANT_VIDEO_ADDED, videoName);
 		} else {
 			// TODO: Do something if Video already present
 			System.out.println("exception: video name aleady present!");
@@ -97,14 +78,14 @@ public class UnpopularState extends AbstractState {
 			// Removing video to cache
 			this.context.getDataSource().getStore().remove(videoName);
 
-			// Need to refresh score
-			refresh();
+			// Need to update score
+			updateScore();
 
 			// Updating state
-			update();
+			updateState();
 
 			// Adding to result
-			Results.add(StateName.UNPOPULAR, this.CONSTANT_VIDEO_REMOVED, videoName);
+			Results.add(STATE_NAME, this.CONSTANT_VIDEO_REMOVED, videoName);
 		} else {
 			// TODO: Do something if Video is not present
 			System.out.println("exception: video not found!");
@@ -122,14 +103,14 @@ public class UnpopularState extends AbstractState {
 			this.context.getDataSource().getStore().get(videoRef.getName()).update(videoRef.getViews(),
 					videoRef.getLikes(), videoRef.getDislikes());
 
-			// Need to refresh score
-			refresh();
+			// Need to update score
+			updateScore();
 
 			// Updating state
-			update();
+			updateState();
 
 			// Adding to result
-			Results.add(StateName.UNPOPULAR, this.CONSTANT_SCORE_UPDATE, this.channelScore.toString());
+			Results.add(STATE_NAME, this.CONSTANT_SCORE_UPDATE, this.channelScore.toString());
 
 		} else {
 			// TODO: Do something if Video is not present
@@ -141,12 +122,12 @@ public class UnpopularState extends AbstractState {
 	public void request(String input) {
 		final Advertisement advertisementRef = this.requestformatter(input);
 
-		if (advertisementRef.getLength() <= RANGE) {
+		if (advertisementRef.getLength() <= STATE_AD_REQUEST_RANGE) {
 			// Adding to result
-			Results.add(StateName.UNPOPULAR, Operation.AD_REQUEST.value, this.CONSTANT_AD_REQUEST_APPROVED);
+			Results.add(STATE_NAME, Operation.AD_REQUEST.value, this.CONSTANT_AD_REQUEST_APPROVED);
 		} else {
 			// Adding to result
-			Results.add(StateName.UNPOPULAR, Operation.AD_REQUEST.value, this.CONSTANT_AD_REQUEST_REJECTED);
+			Results.add(STATE_NAME, Operation.AD_REQUEST.value, this.CONSTANT_AD_REQUEST_REJECTED);
 		}
 
 	}
