@@ -1,5 +1,12 @@
 package channelpopularity.entity;
 
+import channelpopularity.exception.ChannelPopularityException;
+import channelpopularity.exception.ErrorCode;
+
+/**
+ * @author preetipriyam
+ *
+ */
 public class Video {
 
 	private String name;
@@ -19,6 +26,8 @@ public class Video {
 	 * @param views
 	 * @param likes
 	 * @param dislikes
+	 *
+	 *
 	 */
 	public Video(String name, Integer views, Integer likes, Integer dislikes) {
 		this.name = name;
@@ -29,56 +38,56 @@ public class Video {
 	}
 
 	/**
-	 * @param name the name to set
+	 * @param name
 	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
 	/**
-	 * @param views the views to set
+	 * @param views
 	 */
 	public void setViews(Integer views) {
 		this.views = views;
 	}
 
 	/**
-	 * @param likes the likes to set
+	 * @param likes
 	 */
 	public void setLikes(Integer likes) {
 		this.likes = likes;
 	}
 
 	/**
-	 * @param dislikes the dislikes to set
+	 * @param dislikes
 	 */
 	public void setDislikes(Integer dislikes) {
 		this.dislikes = dislikes;
 	}
 
 	/**
-	 * @return the name
+	 * @return String: name.
 	 */
 	public String getName() {
 		return name;
 	}
 
 	/**
-	 * @return the views
+	 * @return Integer: views.
 	 */
 	public Integer getViews() {
 		return views;
 	}
 
 	/**
-	 * @return the likes
+	 * @return Integer: likes.
 	 */
 	public Integer getLikes() {
 		return likes;
 	}
 
 	/**
-	 * @return the dislikes
+	 * @return Integer: dislikes
 	 */
 	public Integer getDislikes() {
 		return dislikes;
@@ -126,11 +135,20 @@ public class Video {
 		return true;
 	}
 
-	public void update(final Integer views, final Integer likes, final Integer dislikes) {
-
-		// TODO: check if the values of params > existing member variables and throw
-		// exception
+	/**
+	 * Method to update the popularity score of the video.
+	 *
+	 * @param views
+	 * @param likes
+	 * @param dislikes
+	 * @throws ChannelPopularityException
+	 */
+	public void update(final Integer views, final Integer likes, final Integer dislikes)
+			throws ChannelPopularityException {
 		synchronized (this) {
+			if (likes < 0 && likes > this.getLikes() || dislikes < 0 && dislikes > this.getDislikes())
+				throw new ChannelPopularityException(ErrorCode.ARITHMATIC_EXCEPTION,
+						"Decrease in likes or dislikes is more than the total number of likes or dislikes, respectively.");
 
 			Integer currViews = views > 0 ? (this.getViews() + views) : this.getViews();
 

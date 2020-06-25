@@ -1,5 +1,9 @@
 package channelpopularity.operation;
 
+/**
+ * @author preetipriyam
+ *
+ */
 public enum Operation {
 
 	ADD_VIDEO("ADD_VIDEO"), REMOVE_VIDEO("REMOVE_VIDEO"), METRICS("METRICS"), AD_REQUEST("AD_REQUEST");

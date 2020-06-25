@@ -5,64 +5,91 @@ import java.nio.file.InvalidPathException;
 
 import channelpopularity.context.ChannelContext;
 import channelpopularity.context.ChannelContextI;
+import channelpopularity.exception.ChannelPopularityException;
+import channelpopularity.exception.ErrorCode;
 import channelpopularity.operation.Operation;
 import channelpopularity.state.StateName;
 import channelpopularity.state.factory.SimpleStateFactory;
 import channelpopularity.state.factory.SimpleStateFactoryI;
+import channelpopularity.util.FileDisplayInterface;
 import channelpopularity.util.FileProcessor;
 import channelpopularity.util.Results;
 import channelpopularity.util.StdoutDisplayInterface;
-import channelpopularity.util.FileDisplayInterface;
+
 
 /**
- * @param input
+ * @author preetipriyam
+ *
  */
-public class Helper{
+public class Helper {
 
-public static void init(String input, String output) {
+	/**
+	 * Method to initialize program.
+	 *
+	 * @param input
+	 * @param output
+	 */
+	public static void process(String input, String output) throws ChannelPopularityException {
 
-    try{
-        final String PATH = "./" + input;
-        FileProcessor fp = new FileProcessor(PATH);
-        SimpleStateFactoryI factoryI = new SimpleStateFactory();
-        ChannelContextI context = new ChannelContext(factoryI, StateName.getList());
-        String instruction = null;
-        do {
-            instruction = fp.poll();// read next line
+		FileProcessor fp = null;
 
-            if (instruction != null) {
+		try {
+			final String PATH = "./" + input;
 
-              if (instruction.contains(Operation.ADD_VIDEO.value)) {
-                  context.add(instruction);
-              } else if (instruction.contains(Operation.REMOVE_VIDEO.value)) {
-                  context.remove(instruction);
-              } else if (instruction.contains(Operation.METRICS.value)) {
-                  context.metrics(instruction);
-              } else if (instruction.contains(Operation.AD_REQUEST.value)) {
-                  context.request(instruction);
-              } else {
-                  System.out.println("exception: Invalid Input exception!");
-              }
-          } else {
+			fp = new FileProcessor(PATH);
 
-          }
+			SimpleStateFactoryI factoryI = new SimpleStateFactory();
 
-       } while (instruction != null);
+			ChannelContextI context = new ChannelContext(factoryI, StateName.getList());
 
-       // this is called casting, see we have same overloaded print method but see the
- 			// same result object behaves differently for this interface
- 			StdoutDisplayInterface stdout = new Results();
- 			stdout.print();
+			String instruction = null;
 
- 			// this is called casting, see we have same overloaded print method but see the
- 			// same result object behaves differently for this interface
- 			FileDisplayInterface fileout = new Results();
- 			fileout.print(output);
+			do {
+				instruction = fp.poll(); // read next line
 
-        fp.close();
-    } catch (InvalidPathException | SecurityException | IOException e) {
-        // TODO: Custom Exception
-        e.printStackTrace();
-    }
-  }
+				if (instruction != null) {
+					if (!instruction.contains("::"))
+						throw new ChannelPopularityException(ErrorCode.INVALID_INPUT_FORMAT,
+								"Line in the input file does not follow the specified formats");
+
+					if (instruction.contains(Operation.ADD_VIDEO.value)) {
+						context.add(instruction);
+					} else if (instruction.contains(Operation.REMOVE_VIDEO.value)) {
+						context.remove(instruction);
+					} else if (instruction.contains(Operation.METRICS.value)) {
+						context.metrics(instruction);
+					} else if (instruction.contains(Operation.AD_REQUEST.value)) {
+						context.request(instruction);
+					} else {
+						throw new ChannelPopularityException(ErrorCode.INVALID_IO, "Invalid input");
+					}
+				}
+
+			} while (instruction != null);
+
+			// this is called casting, see we have same overloaded print method but see the
+			// same result object behaves differently for this interface
+			StdoutDisplayInterface stdout = new Results();
+			stdout.print();
+
+			// this is called casting, see we have same overloaded print method but see the
+			// same result object behaves differently for this interface
+			FileDisplayInterface fileout = new Results();
+			fileout.print(output);
+
+		} catch (InvalidPathException e) {
+			throw new ChannelPopularityException(ErrorCode.INVALID_PATH, e.getMessage());
+		} catch (SecurityException e) {
+			throw new ChannelPopularityException(ErrorCode.SECURITY, e.getMessage());
+		} catch (IOException e) {
+			throw new ChannelPopularityException(ErrorCode.INVALID_IO, e.getMessage());
+		} finally {
+			try {
+				if (fp != null)
+					fp.close();
+			} catch (IOException e) {
+				throw new ChannelPopularityException(ErrorCode.RESOURCE_NOT_CLOSED, e.getMessage());
+			}
+		}
+	}
 }

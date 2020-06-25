@@ -3,6 +3,10 @@ package channelpopularity.entity;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @author preetipriyam
+ *
+ */
 public class VideoStore {
 
 	private static volatile VideoStore videoStore;
@@ -16,27 +20,24 @@ public class VideoStore {
 		}
 	}
 
-	// Avoid manipulation during serialization/deserializaation operation.
+	// Avoid manipulation during serialization/deserialization operation.
 	protected VideoStore readResolve() {
 		return getInstance();
 	}
 
 	/**
-	 * @return
+	 * @return Map: STORE.
 	 */
 	public Map<String, Video> getStore() {
 		return STORE;
 	}
 
 	/**
-	 * @return
+	 * @return VideoStore: instance of videoStore.
 	 */
 	public static VideoStore getInstance() {
-		// Double check locking pattern
 		if (videoStore == null) {
-
 			synchronized (VideoStore.class) {
-				// if there is no instance available... create new one
 				if (videoStore == null)
 					videoStore = new VideoStore();
 			}

@@ -6,7 +6,13 @@ import java.util.List;
 import channelpopularity.context.ChannelContextI;
 import channelpopularity.entity.Advertisement;
 import channelpopularity.entity.Video;
+import channelpopularity.exception.ChannelPopularityException;
+import channelpopularity.exception.ErrorCode;
 
+/**
+ * @author preetipriyam
+ *
+ */
 public abstract class AbstractState implements StateI {
 
 	protected final String CONSTANT_VIDEO_ADDED = "VIDEO_ADDED";
@@ -22,10 +28,12 @@ public abstract class AbstractState implements StateI {
 	protected final int minAdvertisementLength = 2;
 
 	/**
+	 * Method to calculate the popularity score of the video.
+	 *
 	 * @param views
 	 * @param likes
 	 * @param dislikes
-	 * @return
+	 * @return type is integer.
 	 */
 	private static final Integer calculatePopularity(Integer views, Integer likes, Integer dislikes) {
 
@@ -36,11 +44,24 @@ public abstract class AbstractState implements StateI {
 		return score;
 	}
 
+	/**
+	 * Method to find the average score of the videos.
+	 *
+	 * @param videoScore
+	 * @param numberOfVideos
+	 * @return
+	 */
 	private static final Integer findAverageScore(final Integer videoScore, final Integer numberOfVideos) {
 		return videoScore > 0 && numberOfVideos > 0 && videoScore >= numberOfVideos ? videoScore / numberOfVideos
 				: null;
 	}
 
+	/**
+	 * Method to get the average score of the videos.
+	 *
+	 * @param context
+	 * @return Integer: average score of videos.
+	 */
 	protected final Integer getAverageTotalScore(ChannelContextI context) {
 
 		final List<Integer> videoScores = new ArrayList<>();
@@ -58,8 +79,10 @@ public abstract class AbstractState implements StateI {
 	}
 
 	/**
+	 * Method to format the input string for add and remove video functionality.
+	 *
 	 * @param input
-	 * @return Name of the video
+	 * @return String: name of the video.
 	 */
 	protected String formatter(String input) {
 
@@ -70,10 +93,13 @@ public abstract class AbstractState implements StateI {
 	}
 
 	/**
+	 * Method to format the input string for metrics functionality.
+	 *
 	 * @param input
-	 * @return
+	 * @return metricsformatter: instance of the video.
+	 * @throws ChannelPopularityException
 	 */
-	protected Video metricsformatter(String input) {
+	protected Video metricsformatter(String input) throws ChannelPopularityException {
 
 		Video video = new Video();
 
@@ -89,7 +115,13 @@ public abstract class AbstractState implements StateI {
 		for (int i = 0; i <= arr.length - 1; i++) {
 			String[] curr = arr[i].split("=");
 			if (curr[0].equalsIgnoreCase("VIEWS")) {
-				video.setViews(Integer.parseInt(curr[1]));
+				Integer views = Integer.parseInt(curr[1]);
+
+				if (views < 0)
+					throw new ChannelPopularityException(ErrorCode.INVALID_INPUT_FORMAT,
+							"Negative value for number of views in an input line");
+
+				video.setViews(views);
 			} else if (curr[0].equalsIgnoreCase("LIKES")) {
 				video.setLikes(Integer.parseInt(curr[1]));
 			} else if (curr[0].equalsIgnoreCase("DISLIKES")) {
@@ -104,25 +136,30 @@ public abstract class AbstractState implements StateI {
 	}
 
 	/**
+	 * Method to format the input string for Ad Request functionality.
+	 *
 	 * @param input
-	 * @return
+	 * @return Advertisement: instance of Advertisement.
+	 * @throws ChannelPopularityException
 	 */
-	protected Advertisement requestformatter(String input) {
+	protected Advertisement requestformatter(String input) throws ChannelPopularityException {
 
 		Advertisement advertisement = new Advertisement();
 
 		String[] instructions = input.split("::");
 		String[] prefix = instructions[0].split("__");
+
+		if (prefix[1] == null || prefix[1].isEmpty())
+			throw new ChannelPopularityException(ErrorCode.RESOURCE_NOT_FOUND,
+					"Video associated with an advertisement request does not exist");
+
 		String[] suffix = instructions[1].split("=");
 
 		Integer length = Integer.parseInt(suffix[1]);
 
-		if (length <= minAdvertisementLength) {
-			// TODO: throw new Custom Invalid exception
-			System.out.println("exception: Invalid Input!");
-
-			// remove the return once exception is added here
-			return null;
+		if (length <= minAdvertisementLength || !(length > Integer.MIN_VALUE && length < Integer.MAX_VALUE)) {
+			throw new ChannelPopularityException(ErrorCode.INVALID_INPUT_FORMAT,
+					"Values for views, likes, dislikes or advertisement length are not integers");
 		}
 
 		advertisement.setLength(length);

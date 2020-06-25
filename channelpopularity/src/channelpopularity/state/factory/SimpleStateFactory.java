@@ -8,12 +8,19 @@ import channelpopularity.state.data.MildlyPopularState;
 import channelpopularity.state.data.UltraPopularState;
 import channelpopularity.state.data.UnpopularState;
 
+/**
+ * @author preetipriyam
+ *
+ */
 public class SimpleStateFactory implements SimpleStateFactoryI {
 
 	public SimpleStateFactory() {
 	}
 
-	/** 
+	/**
+	 * Method to get the instance of the state.
+	 *
+	 * @param context
 	 * @param stateName
 	 * @return
 	 */
@@ -40,7 +47,6 @@ public class SimpleStateFactory implements SimpleStateFactoryI {
 			break;
 
 		default:
-			// TODO: throw custom exception
 			break;
 
 		}

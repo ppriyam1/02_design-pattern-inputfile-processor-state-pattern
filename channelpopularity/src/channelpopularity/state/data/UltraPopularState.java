@@ -3,11 +3,17 @@ package channelpopularity.state.data;
 import channelpopularity.context.ChannelContextI;
 import channelpopularity.entity.Advertisement;
 import channelpopularity.entity.Video;
+import channelpopularity.exception.ChannelPopularityException;
+import channelpopularity.exception.ErrorCode;
 import channelpopularity.operation.Operation;
 import channelpopularity.state.AbstractState;
 import channelpopularity.state.StateName;
 import channelpopularity.util.Results;
 
+/**
+ * @author preetipriyam
+ *
+ */
 public class UltraPopularState extends AbstractState {
 
 	private static final String STATE_NAME = StateName.ULTRA_POPULAR.toString();
@@ -44,7 +50,7 @@ public class UltraPopularState extends AbstractState {
 	}
 
 	@Override
-	public void add(String input) {
+	public void add(String input) throws ChannelPopularityException {
 
 		String videoName = this.formatter(input);
 
@@ -61,13 +67,12 @@ public class UltraPopularState extends AbstractState {
 			// Adding to result
 			Results.add(STATE_NAME, this.CONSTANT_VIDEO_ADDED, videoName);
 		} else {
-			// TODO: Do something if Video already present
-			System.out.println("exception: video name aleady present!");
+			throw new ChannelPopularityException(ErrorCode.RESOURCE_ALREADY_EXISTS, "Video is already present");
 		}
 	}
 
 	@Override
-	public void remove(String input) {
+	public void remove(String input) throws ChannelPopularityException {
 
 		String videoName = this.formatter(input);
 
@@ -84,13 +89,12 @@ public class UltraPopularState extends AbstractState {
 			// Adding to result
 			Results.add(STATE_NAME, this.CONSTANT_VIDEO_REMOVED, videoName);
 		} else {
-			// TODO: Do something if Video is not present
-			System.out.println("exception: video not found!");
+			throw new ChannelPopularityException(ErrorCode.RESOURCE_NOT_FOUND, "Video does not exist");
 		}
 	}
 
 	@Override
-	public void metrics(String input) {
+	public void metrics(String input) throws ChannelPopularityException {
 
 		final Video videoRef = this.metricsformatter(input);
 
@@ -110,13 +114,12 @@ public class UltraPopularState extends AbstractState {
 			Results.add(STATE_NAME, this.CONSTANT_SCORE_UPDATE, this.channelScore.toString());
 
 		} else {
-			// TODO: Do something if Video is not present
-			System.out.println("exception: video not found!");
+			throw new ChannelPopularityException(ErrorCode.RESOURCE_NOT_FOUND, "Video does not exist");
 		}
 	}
 
 	@Override
-	public void request(String input) {
+	public void request(String input) throws ChannelPopularityException {
 		final Advertisement advertisementRef = this.requestformatter(input);
 
 		if (advertisementRef.getLength() <= STATE_AD_REQUEST_RANGE) {

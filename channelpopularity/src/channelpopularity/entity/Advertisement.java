@@ -1,5 +1,9 @@
 package channelpopularity.entity;
 
+/**
+ * @author preetipriyam
+ *
+ */
 public class Advertisement {
 
 	private Integer length;
@@ -15,28 +19,28 @@ public class Advertisement {
 	}
 
 	/**
-	 * @return the length
+	 * @return Integer: length.
 	 */
 	public Integer getLength() {
 		return length;
 	}
 
 	/**
-	 * @param length the length to set
+	 * @param length
 	 */
 	public void setLength(Integer length) {
 		this.length = length;
 	}
 
 	/**
-	 * @return the videoName
+	 * @return String: videoName.
 	 */
 	public String getVideoName() {
 		return videoName;
 	}
 
 	/**
-	 * @param videoName the videoName to set
+	 * @param videoName
 	 */
 	public void setVideoName(String videoName) {
 		this.videoName = videoName;

@@ -7,6 +7,7 @@ import channelpopularity.state.StateName;
 public interface SimpleStateFactoryI {
 
 	/**
+	 * Method to create instance of the states.
 	 * @param context
 	 * @param stateName
 	 * @return

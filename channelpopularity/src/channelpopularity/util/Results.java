@@ -1,11 +1,16 @@
 package channelpopularity.util;
 
-import channelpopularity.state.StateName;
-import channelpopularity.driver.Helper;
-import java.util.ArrayList;
-import java.io.FileWriter;
 import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 
+import channelpopularity.exception.ChannelPopularityException;
+import channelpopularity.exception.ErrorCode;
+
+/**
+ * @author preetipriyam
+ *
+ */
 public class Results implements FileDisplayInterface, StdoutDisplayInterface {
 
 	public Results() {
@@ -13,6 +18,11 @@ public class Results implements FileDisplayInterface, StdoutDisplayInterface {
 
 	private static final StringBuilder builder = new StringBuilder();
 
+	/**
+	 * @param state
+	 * @param operation
+	 * @param target
+	 */
 	public static void add(String state, String operation, String target) {
 		builder.append(state + "__" + operation + "::" + target + " \n");
 	}
@@ -23,15 +33,13 @@ public class Results implements FileDisplayInterface, StdoutDisplayInterface {
 	}
 
 	@Override
-	public void print(String fileName) {
+	public void print(String fileName) throws ChannelPopularityException {
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
 			writer.append(builder.toString());
 			writer.close();
-		}
-		catch(Exception e){
-			System.err.println(e);
-			System.exit(0);
+		} catch (IOException e) {
+			throw new ChannelPopularityException(ErrorCode.INVALID_IO, e.getMessage());
 		}
 	}
 }

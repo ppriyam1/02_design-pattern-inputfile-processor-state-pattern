@@ -3,6 +3,10 @@ package channelpopularity.state;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author preetipriyam
+ *
+ */
 public enum StateName {
 
 	UNPOPULAR, MILDLY_POPULAR, HIGHLY_POPULAR, ULTRA_POPULAR;
