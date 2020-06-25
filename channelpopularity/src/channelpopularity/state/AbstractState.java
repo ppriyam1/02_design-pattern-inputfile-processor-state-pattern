@@ -114,21 +114,26 @@ public abstract class AbstractState implements StateI {
 
 		for (int i = 0; i <= arr.length - 1; i++) {
 			String[] curr = arr[i].split("=");
-			if (curr[0].equalsIgnoreCase("VIEWS")) {
-				Integer views = Integer.parseInt(curr[1]);
+			try {
+				if (curr[0].equalsIgnoreCase("VIEWS")) {
+					Integer views = Integer.parseInt(curr[1]);
 
-				if (views < 0)
+					if (views < 0)
+						throw new ChannelPopularityException(ErrorCode.INVALID_INPUT_FORMAT,
+								"Negative value for number of views in an input line");
+
+					video.setViews(views);
+				} else if (curr[0].equalsIgnoreCase("LIKES")) {
+					video.setLikes(Integer.parseInt(curr[1]));
+				} else if (curr[0].equalsIgnoreCase("DISLIKES")) {
+					video.setDislikes(Integer.parseInt(curr[1]));
+				} else {
 					throw new ChannelPopularityException(ErrorCode.INVALID_INPUT_FORMAT,
-							"Negative value for number of views in an input line");
-
-				video.setViews(views);
-			} else if (curr[0].equalsIgnoreCase("LIKES")) {
-				video.setLikes(Integer.parseInt(curr[1]));
-			} else if (curr[0].equalsIgnoreCase("DISLIKES")) {
-				video.setDislikes(Integer.parseInt(curr[1]));
-			} else {
-				// TODO: Custom Exception
-				System.out.println("exception: Invalid input");
+							"Line in the input file does not follow the specified formats");
+				}
+			} catch (NumberFormatException e) {
+				throw new ChannelPopularityException(ErrorCode.INVALID_INPUT_FORMAT,
+						"Values for views, likes, dislikes or advertisement length are not integers");
 			}
 		}
 
@@ -155,15 +160,21 @@ public abstract class AbstractState implements StateI {
 
 		String[] suffix = instructions[1].split("=");
 
-		Integer length = Integer.parseInt(suffix[1]);
+		try {
+			Integer length = Integer.parseInt(suffix[1]);
 
-		if (length <= minAdvertisementLength || !(length > Integer.MIN_VALUE && length < Integer.MAX_VALUE)) {
+			if (length <= minAdvertisementLength || !(length > Integer.MIN_VALUE && length < Integer.MAX_VALUE)) {
+				throw new ChannelPopularityException(ErrorCode.INVALID_INPUT_FORMAT,
+						"Values for views, likes, dislikes or advertisement length are not integers");
+			}
+
+			advertisement.setLength(length);
+			advertisement.setVideoName(prefix[1]);
+
+		} catch (NumberFormatException e) {
 			throw new ChannelPopularityException(ErrorCode.INVALID_INPUT_FORMAT,
 					"Values for views, likes, dislikes or advertisement length are not integers");
 		}
-
-		advertisement.setLength(length);
-		advertisement.setVideoName(prefix[1]);
 
 		return advertisement;
 	}

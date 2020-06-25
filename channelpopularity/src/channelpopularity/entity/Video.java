@@ -38,7 +38,7 @@ public class Video {
 	}
 
 	/**
-	 * @param name
+	 * @param name the name to set
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -146,19 +146,16 @@ public class Video {
 	public void update(final Integer views, final Integer likes, final Integer dislikes)
 			throws ChannelPopularityException {
 		synchronized (this) {
-			if (likes < 0 && likes > this.getLikes() || dislikes < 0 && dislikes > this.getDislikes())
-				throw new ChannelPopularityException(ErrorCode.ARITHMATIC_EXCEPTION,
-						"Decrease in likes or dislikes is more than the total number of likes or dislikes, respectively.");
+			
+			if (likes < 0 && Math.abs(likes) > this.getLikes() || dislikes < 0 && Math.abs(dislikes) > this.getDislikes())
+				throw new ChannelPopularityException(ErrorCode.ARITHMATIC_EXCEPTION,"Decrease in likes or dislikes is more than the total number of likes or dislikes, respectively.");
 
 			Integer currViews = views > 0 ? (this.getViews() + views) : this.getViews();
-
 			Integer currLikes = likes != 0 ? (this.getLikes() + likes) : this.getLikes();
 			Integer currDislikes = dislikes != 0 ? (this.getDislikes() + dislikes) : this.getDislikes();
-
 			currViews = currViews >= 0 ? currViews : this.getViews();
 			currLikes = currLikes >= 0 ? currLikes : this.getLikes();
 			currDislikes = currDislikes >= 0 ? currDislikes : this.getDislikes();
-
 			this.setViews(currViews);
 			this.setLikes(currLikes);
 			this.setDislikes(currDislikes);

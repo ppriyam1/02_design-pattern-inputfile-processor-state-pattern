@@ -16,7 +16,6 @@ import channelpopularity.util.FileProcessor;
 import channelpopularity.util.Results;
 import channelpopularity.util.StdoutDisplayInterface;
 
-
 /**
  * @author preetipriyam
  *
@@ -28,6 +27,7 @@ public class Helper {
 	 *
 	 * @param input
 	 * @param output
+	 * @throws ChannelPopularityException
 	 */
 	public static void process(String input, String output) throws ChannelPopularityException {
 
@@ -44,39 +44,71 @@ public class Helper {
 
 			String instruction = null;
 
-			do {
-				instruction = fp.poll(); // read next line
+			instruction = fp.poll(); // read next line
 
-				if (instruction != null) {
-					if (!instruction.contains("::"))
-						throw new ChannelPopularityException(ErrorCode.INVALID_INPUT_FORMAT,
-								"Line in the input file does not follow the specified formats");
+			// check file empty
 
-					if (instruction.contains(Operation.ADD_VIDEO.value)) {
-						context.add(instruction);
-					} else if (instruction.contains(Operation.REMOVE_VIDEO.value)) {
-						context.remove(instruction);
-					} else if (instruction.contains(Operation.METRICS.value)) {
-						context.metrics(instruction);
-					} else if (instruction.contains(Operation.AD_REQUEST.value)) {
-						context.request(instruction);
-					} else {
-						throw new ChannelPopularityException(ErrorCode.INVALID_IO, "Invalid input");
-					}
+			if (instruction == null || instruction.isEmpty())
+
+				throw new ChannelPopularityException(ErrorCode.INVALID_INPUT_EMPTY, "Input file is empty");
+
+			while (instruction != null) {
+
+				if (instruction.isEmpty()) {
+
+					throw new ChannelPopularityException(ErrorCode.INVALID_INPUT_EMPTY,
+
+							"Line in the input file does not follow the specified formats");
+
 				}
 
-			} while (instruction != null);
+				if (!instruction.contains("::"))
+
+					throw new ChannelPopularityException(ErrorCode.INVALID_INPUT_FORMAT,
+
+							"Line in the input file does not follow the specified formats");
+
+				if (instruction.contains(Operation.ADD_VIDEO.value)) {
+
+					context.add(instruction);
+
+				} else if (instruction.contains(Operation.REMOVE_VIDEO.value)) {
+
+					context.remove(instruction);
+
+				} else if (instruction.contains(Operation.METRICS.value)) {
+
+					context.metrics(instruction);
+
+				} else if (instruction.contains(Operation.AD_REQUEST.value)) {
+
+					context.request(instruction);
+
+				} else {
+
+					throw new ChannelPopularityException(ErrorCode.INVALID_IO, "Invalid input");
+
+				}
+
+				instruction = fp.poll();
+
+			}
 
 			// this is called casting, see we have same overloaded print method but see the
+
 			// same result object behaves differently for this interface
+
 			StdoutDisplayInterface stdout = new Results();
+
 			stdout.print();
 
 			// this is called casting, see we have same overloaded print method but see the
-			// same result object behaves differently for this interface
-			FileDisplayInterface fileout = new Results();
-			fileout.print(output);
 
+			// same result object behaves differently for this interface
+
+			FileDisplayInterface fileout = new Results();
+
+			fileout.print(output);
 		} catch (InvalidPathException e) {
 			throw new ChannelPopularityException(ErrorCode.INVALID_PATH, e.getMessage());
 		} catch (SecurityException e) {
